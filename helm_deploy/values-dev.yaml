@@ -1,0 +1,15 @@
+---
+# Per environment values which override defaults in hmpps-template-typescript/values.yaml
+
+generic-service:
+  replicaCount: 2
+
+  ingress:
+    host: matomo-dev.hmpps.service.justice.gov.uk
+
+  env:
+    ENVIRONMENT_NAME: DEV
+    AUDIT_ENABLED: "false"
+
+generic-prometheus-alerts:
+  alertSeverity: NON_PROD_ALERTS_SEVERITY_LABEL
