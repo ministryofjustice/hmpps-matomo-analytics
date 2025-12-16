@@ -8,7 +8,7 @@ generic-service:
   replicaCount: 4
 
   image:
-    repository: ghcr.io/matomo/3.5.1-fpm-alpine
+    repository: ghcr.io/ministryofjustice/hmpps-matomo-analytics
     tag: app_version # override at deployment time
     port: 3000
 

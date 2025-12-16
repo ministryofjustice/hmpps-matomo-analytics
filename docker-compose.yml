@@ -1,0 +1,39 @@
+---
+services:
+  db:
+    image: mariadb:lts
+    command: --max-allowed-packet=64MB
+    restart: always
+    volumes:
+      - db:/var/lib/mysql:Z
+    environment:
+      - MARIADB_AUTO_UPGRADE=1
+      - MARIADB_DATABASE=matomo
+      - MARIADB_DISABLE_UPGRADE_BACKUP=1
+      - MARIADB_INITDB_SKIP_TZINFO=1
+      - MARIADB_PASSWORD=something-temp
+      - MARIADB_ROOT_PASSWORD=something-temp-also
+      - MARIADB_USER=matomo
+
+  app:
+    image: matomo
+    restart: always
+    volumes:
+#     - ./config:/var/www/html/config:z
+#     - ./logs:/var/www/html/logs:z
+      - matomo:/var/www/html:z
+    depends_on:
+      - db
+    environment:
+      - MATOMO_DATABASE_ADAPTER=mysql
+      - MATOMO_DATABASE_DBNAME=matomo
+      - MATOMO_DATABASE_HOST=db
+      - MATOMO_DATABASE_PASSWORD=something-temp
+      - MATOMO_DATABASE_TABLES_PREFIX=matomo_
+      - MATOMO_DATABASE_USERNAME=matomo
+    ports:
+      - 8080:80
+
+volumes:
+  db:
+  matomo:
