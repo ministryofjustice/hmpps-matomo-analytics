@@ -3,12 +3,12 @@ generic-service:
   productId: 'DPS035' # productId for the product that this belongs too, i.e. DPS001, see README.md for details
 
   # the IRSA service account name for accessing AWS resources
-  # serviceAccountName: "hmpps-template-typescript"
+  # serviceAccountName: "hmpps-matomo-analytics"
 
   replicaCount: 4
 
   image:
-    repository: matomo
+    repository: ghcr.io/ministryofjustice/hmpps-matomo-analytics
     tag: app_version    # override at deployment time
     port: 3000
 
