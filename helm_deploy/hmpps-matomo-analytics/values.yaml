@@ -9,7 +9,7 @@ generic-service:
 
   image:
     repository: matomo
-    tag: '5.5'
+    tag: app_version    # override at deployment time
     port: 3000
 
   ingress:

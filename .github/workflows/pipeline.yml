@@ -34,4 +34,4 @@ jobs:
   #   secrets: inherit
   #   with:
   #     environment: 'dev'
-  #     app_version: ''
+  #     app_version: '5.5'
