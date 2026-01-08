@@ -49,4 +49,4 @@ jobs:
     secrets: inherit
     with:
       environment: 'dev'
-      app_version: '5.5'
+      app_version: '${{ needs.build.outputs.app_version }}'
