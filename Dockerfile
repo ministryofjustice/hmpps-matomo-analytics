@@ -6,14 +6,18 @@ RUN apk add --no-cache nginx
 # Remove user directive from main nginx config since we run as non-root
 RUN sed -i '/^user /d' /etc/nginx/nginx.conf
 
-# Copy nginx configuration and startup script
-COPY nginx.conf /etc/nginx/http.d/default.conf
-COPY start.sh /start.sh
-RUN chmod +x /start.sh
+# Copy Matomo files from source to web root.
+# This replicates what the base image entrypoint does.
+RUN tar cf - --one-file-system -C /usr/src/matomo . | tar xf - -C /var/www/html
 
 # Ensure nginx directories are writable by www-data
 RUN mkdir -p /var/lib/nginx/tmp /run/nginx && \
     chown -R www-data:www-data /var/lib/nginx /var/log/nginx /run/nginx
+
+# Copy nginx configuration and startup script
+COPY nginx.conf /etc/nginx/http.d/default.conf
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
 
 # Run as www-data (UID 82) instead of root
 USER 82
