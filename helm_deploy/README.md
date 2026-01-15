@@ -1,69 +1,62 @@
-# Deployment Notes
+# HMPPS Matomo Analytics - Deployment
+
+This deploys a containerized Matomo analytics instance running as non-root with nginx + PHP-FPM.
 
 ## Prerequisites
 
-- Ensure you have helm v3 client installed.
-
+### 1. Helm v4 Client
 ```sh
-$ helm version
-version.BuildInfo{Version:"v3.0.1", GitCommit:"7c22ef9ce89e0ebeb7125ba2ebf7d421f3e82ffa", GitTreeState:"clean", GoVersion:"go1.13.4"}
+helm version
 ```
 
-- Ensure a TLS cert for your intended hostname is configured and ready, see section below.
-
-### Useful helm (v3) commands:
-
-__Test chart template rendering:__
-
-This will out the fully rendered kubernetes resources in raw yaml.
-
-```sh
-helm template [path to chart] --values=values-dev.yaml
+### 2. TLS Certificate
+Ensure a certificate exists in the cloud-platform-environments repo:
+```
+cloud-platform-environments/namespaces/live.cloud-platform.service.justice.gov.uk/hmpps-matomo-analytics-<env>/certificate.yaml
 ```
 
-__List releases:__
+### 3. Database Secret
+The `matomo-rds` secret must exist in the namespace with these keys:
+- `rds_instance_address`
+- `database_name`
+- `database_username`
+- `database_password`
 
+### 4. PersistentVolumeClaim (Manual Step)
+**Must be created before first deployment** - GitHub Actions lacks PVC permissions.
+
+Edit `helm_deploy/pvc.yaml` to set the correct namespace, then apply:
 ```sh
-helm --namespace [namespace] list
+kubectl apply -f helm_deploy/pvc.yaml -n hmpps-analytics-dev
 ```
 
-__List current and previously installed application versions:__
+This creates a 10Gi gp3 EBS volume for `/var/www/html/config`, `/var/www/html/plugins`, and `/var/www/html/tmp`.
 
+**Note:** Due to ReadWriteOnce access mode (gp3 limitation), only 1 replica is supported.
+
+## Useful Commands
+
+**List releases:**
 ```sh
-helm --namespace [namespace] history [release name]
+helm list -n hmpps-analytics-dev
 ```
 
-__Rollback to previous version:__
-
+**View history:**
 ```sh
-helm --namespace [namespace] rollback [release name] [revision number] --wait
+helm history hmpps-matomo-analytics -n hmpps-analytics-dev
 ```
 
-Note: replace _revision number_ with one from listed in the `history` command)
-
-__Example deploy command:__
-
-The following example is `--dry-run` mode - which will allow for testing. Github actions normally runs this command with actual secret values (from AWS secret manager), and also updated the chart's application version to match the release version:
-
+**Rollback:**
 ```sh
-helm upgrade [release name] [path to chart]. \
-  --install --wait --force --reset-values --timeout 5m --history-max 10 \
-  --dry-run \
-  --namespace [namespace] \
-  --values values-dev.yaml \
-  --values example-secrets.yaml
+helm rollback hmpps-matomo-analytics <revision> -n hmpps-analytics-dev --wait
 ```
 
-### Ingress TLS certificate
-
-Ensure a certificate definition exists in the cloud-platform-environments repo under the relevant namespaces folder:
-
-e.g.
-
+**Check PVC:**
 ```sh
-cloud-platform-environments/namespaces/live-1.cloud-platform.service.justice.gov.uk/[INSERT NAMESPACE NAME]/05-certificate.yaml
+kubectl get pvc matomo-pvc -n hmpps-analytics-dev
 ```
 
-Ensure the certificate is created and ready for use.
-
-The name of the kubernetes secret where the certificate is stored is used as a value to the helm chart - this is used to configure the ingress.
+**View logs:**
+```sh
+kubectl logs -f -l app=hmpps-matomo-analytics -n hmpps-analytics-dev
+```
