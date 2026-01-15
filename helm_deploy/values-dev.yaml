@@ -2,8 +2,6 @@
 # Per environment values which override defaults in hmpps-template-typescript/values.yaml
 
 generic-service:
-  replicaCount: 1
-
   ingress:
     host: matomo-dev.hmpps.service.justice.gov.uk
 

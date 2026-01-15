@@ -5,7 +5,9 @@ generic-service:
   # the IRSA service account name for accessing AWS resources
   # serviceAccountName: "hmpps-matomo-analytics"
 
-  replicaCount: 4
+  # replicaCount must be 1 because the PVC uses gp3 storage (ReadWriteOnce)
+  # which only supports a single pod per volume
+  replicaCount: 1
 
   image:
     repository: ghcr.io/ministryofjustice/hmpps-matomo-analytics
