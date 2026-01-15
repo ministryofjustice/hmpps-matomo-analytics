@@ -10,7 +10,7 @@ generic-service:
   image:
     repository: ghcr.io/ministryofjustice/hmpps-matomo-analytics
     tag: app_version    # override at deployment time
-    port: 3000
+    port: 9000
 
   ingress:
     enabled: true
