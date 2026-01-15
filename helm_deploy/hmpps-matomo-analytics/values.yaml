@@ -10,7 +10,7 @@ generic-service:
   image:
     repository: ghcr.io/ministryofjustice/hmpps-matomo-analytics
     tag: app_version    # override at deployment time
-    port: 9000
+    port: 8080  # nginx port
 
   ingress:
     enabled: true
@@ -20,10 +20,24 @@ generic-service:
   livenessProbe:
     httpGet:
       path: /matomo.php
+      port: 8080
+    initialDelaySeconds: 15
+    periodSeconds: 10
 
   readinessProbe:
     httpGet:
       path: /matomo.php
+      port: 8080
+    initialDelaySeconds: 15
+    periodSeconds: 10
+  
+  securityContext:
+    runAsUser: 82
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
 
   # Environment variables to load into the deployment
   env:
