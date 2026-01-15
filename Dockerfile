@@ -21,5 +21,9 @@ USER 82
 # Expose port 8080 for nginx
 EXPOSE 8080
 
+# Override the base image entrypoint to avoid permission issues
+# The base image entrypoint tries to chown files which fails when not running as root
+ENTRYPOINT []
+
 # Start both services
 CMD ["/start.sh"]
