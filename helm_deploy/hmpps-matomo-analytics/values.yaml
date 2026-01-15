@@ -1,0 +1,88 @@
+generic-service:
+  nameOverride: hmpps-matomo-analytics
+  productId: 'DPS035' # productId for the product that this belongs too, i.e. DPS001, see README.md for details
+
+  # the IRSA service account name for accessing AWS resources
+  # serviceAccountName: "hmpps-matomo-analytics"
+
+  # replicaCount must be 1 because the PVC uses gp3 storage (ReadWriteOnce)
+  # which only supports a single pod per volume
+  replicaCount: 1
+
+  image:
+    repository: ghcr.io/ministryofjustice/hmpps-matomo-analytics
+    tag: app_version    # override at deployment time
+    port: 8080  # nginx port
+
+  ingress:
+    enabled: true
+    host: app-hostname.local # override per environment
+    tlsSecretName: hmpps-matomo-analytics-cert
+
+  livenessProbe:
+    httpGet:
+      path: /matomo.php
+      port: 8080
+    initialDelaySeconds: 15
+    periodSeconds: 10
+
+  readinessProbe:
+    httpGet:
+      path: /matomo.php
+      port: 8080
+    initialDelaySeconds: 15
+    periodSeconds: 10
+  
+  # Set fsGroup so PVC-mounted directories are owned by www-data group (82)
+  podSecurityContext:
+    fsGroup: 82
+    fsGroupChangePolicy: "OnRootMismatch"
+
+  securityContext:
+    runAsUser: 82
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+
+  volumes:
+    - name: matomo-data
+      persistentVolumeClaim:
+        claimName: matomo-pvc
+
+  volumeMounts:
+    - name: matomo-data
+      mountPath: /var/www/html/config
+      subPath: config
+    - name: matomo-data
+      mountPath: /var/www/html/plugins
+      subPath: plugins
+    - name: matomo-data
+      mountPath: /var/www/html/tmp
+      subPath: tmp
+
+  # Environment variables to load into the deployment
+  env:
+    MATOMO_DATABASE_ADAPTER: mysql
+    MATOMO_DATABASE_TABLES_PREFIX: matomo_
+    PHP_MEMORY_LIMIT: 2048M
+
+  # Pre-existing kubernetes secrets to load as environment variables in the deployment.
+  # namespace_secrets:
+  #   [name of kubernetes secret]:
+  #     [name of environment variable as seen by app]: [key of kubernetes secret to load]
+
+  namespace_secrets:
+    matomo-rds:
+      MATOMO_DATABASE_HOST: rds_instance_address
+      MATOMO_DATABASE_DBNAME: database_name
+      MATOMO_DATABASE_USERNAME: database_username
+      MATOMO_DATABASE_PASSWORD: database_password
+
+  allowlist:
+    groups:
+      - internal
+
+generic-prometheus-alerts:
+  targetApplication: hmpps-template-typescript

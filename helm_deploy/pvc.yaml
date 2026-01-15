@@ -1,0 +1,19 @@
+# This PVC must be created manually before deploying the Helm chart
+# The GitHub Actions service account doesn't have permissions to create PVCs
+#
+# To create this PVC, run:
+# kubectl apply -f helm_deploy/pvc.yaml -n <namespace>
+#
+# Note: Update the namespace field to match your environment (e.g., hmpps-matomo-analytics-dev)
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: matomo-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: gp3
+  resources:
+    requests:
+      storage: 10Gi
