@@ -10,6 +10,10 @@ RUN sed -i '/^user /d' /etc/nginx/nginx.conf
 # This replicates what the base image entrypoint does.
 RUN tar cf - --one-file-system -C /usr/src/matomo . | tar xf - -C /var/www/html
 
+# Make matomo.js writable so plugins can extend the JavaScript tracker
+RUN chmod +w /var/www/html/matomo.js && \
+    chown www-data:www-data /var/www/html/matomo.js
+
 # Ensure nginx directories are writable by www-data
 RUN mkdir -p /var/lib/nginx/tmp /run/nginx && \
     chown -R www-data:www-data /var/lib/nginx /var/log/nginx /run/nginx
