@@ -33,6 +33,11 @@ generic-service:
     initialDelaySeconds: 15
     periodSeconds: 10
   
+  # Set fsGroup so PVC-mounted directories are owned by www-data group (82)
+  podSecurityContext:
+    fsGroup: 82
+    fsGroupChangePolicy: "OnRootMismatch"
+
   securityContext:
     runAsUser: 82
     runAsNonRoot: true
