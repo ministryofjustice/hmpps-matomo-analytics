@@ -13,6 +13,7 @@ generic-service:
   # Required for ReadWriteOnce volumes
   strategy:
     type: Recreate
+    rollingUpdate: null
 
   image:
     repository: ghcr.io/ministryofjustice/hmpps-matomo-analytics
