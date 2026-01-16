@@ -9,6 +9,11 @@ generic-service:
   # which only supports a single pod per volume
   replicaCount: 1
 
+  # Use Recreate strategy to terminate old pod before starting new one
+  # Required for ReadWriteOnce volumes
+  strategy:
+    type: Recreate
+
   image:
     repository: ghcr.io/ministryofjustice/hmpps-matomo-analytics
     tag: app_version    # override at deployment time
