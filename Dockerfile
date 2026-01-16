@@ -1,7 +1,7 @@
 FROM matomo:5-fpm-alpine
 
-# Install nginx
-RUN apk add --no-cache nginx
+# Install nginx and supervisor
+RUN apk add --no-cache nginx supervisor
 
 # Remove user directive from main nginx config since we run as non-root
 RUN sed -i '/^user /d' /etc/nginx/nginx.conf
@@ -18,10 +18,9 @@ RUN chmod +w /var/www/html/matomo.js && \
 RUN mkdir -p /var/lib/nginx/tmp /run/nginx && \
     chown -R www-data:www-data /var/lib/nginx /var/log/nginx /run/nginx
 
-# Copy nginx configuration and startup script
+# Copy nginx configuration and supervisord config
 COPY nginx.conf /etc/nginx/http.d/default.conf
-COPY start.sh /start.sh
-RUN chmod +x /start.sh
+COPY supervisord.conf /etc/supervisord.conf
 
 # Run as www-data (UID 82) instead of root
 USER 82
@@ -33,5 +32,5 @@ EXPOSE 8080
 # The base image entrypoint tries to chown files which fails when not running as root
 ENTRYPOINT []
 
-# Start both services
-CMD ["/start.sh"]
+# Start supervisord to manage both services
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
