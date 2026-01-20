@@ -14,6 +14,9 @@ RUN tar cf - --one-file-system -C /usr/src/matomo . | tar xf - -C /var/www/html
 RUN chmod +w /var/www/html/matomo.js && \
     chown www-data:www-data /var/www/html/matomo.js
 
+RUN chmod a+w /var/www/html/js && \
+    chown www-data:www-data /var/www/html/js
+
 # Ensure nginx directories are writable by www-data
 RUN mkdir -p /var/lib/nginx/tmp /run/nginx && \
     chown -R www-data:www-data /var/lib/nginx /var/log/nginx /run/nginx
